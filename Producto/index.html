@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>MarketPlace</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+    <!-- Bootstrap icons-->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="css/styles.css" rel="stylesheet" />
+    <!-- Incluir SweetAlert2 CSS y JS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11.5.1/dist/sweetalert2.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.5.1/dist/sweetalert2.all.min.js"></script>
+  </head>
+  <body>
+    <!-- Navigation-->
+    <nav
+      class="navbar navbar-expand-lg navbar-light bg-light"
+      style="
+        height: 10vh !important;
+        position: fixed;
+        width: 100%;
+        z-index: 99999999;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+      "
+    >
+      <div class="container">
+        <a class="navbar-brand" href="#!">MarketPlace</a>
+        <form class="d-flex">
+          <button
+            class="btn btn-outline-dark"
+            type="button"
+            onclick="window.location.href='../Carrito'"
+          >
+            <i class="bi-cart-fill me-1"></i>
+            Cart
+            <span class="badge bg-dark text-white ms-1 rounded-pill" id="cart"
+              >0</span
+            >
+          </button>
+          <button
+            class="btn btn-outline-dark ms-2"
+            type="button"
+            onclick="window.location.href = '../'"
+          >
+            <i class="bi bi-house-door-fill"></i>
+          </button>
+        </form>
+      </div>
+    </nav>
+    <!-- Product section-->
+    <section class="py-5" id="divProducts"></section>
+    <!-- Related items section-->
+    <section class="py-5 bg-light">
+      <div class="container px-4 px-lg-5 mt-5">
+        <h2 class="fw-bolder mb-4">Related products</h2>
+        <div
+          class="row row-cols-1 row-cols-md-2 row-cols-xl-4"
+          id="divProductsCategory"
+        ></div>
+      </div>
+    </section>
+    <!-- Footer-->
+    <footer class="py-5 bg-dark">
+      <div class="container">
+        <p class="m-0 text-center text-white">
+          &copy; 2024 Designed and Developed by
+          <a href="https://juaccrack.github.io/DevFalls/">DevFalls</a>
+        </p>
+      </div>
+    </footer>
+
+    <div class="popup-container" id="popup">
+      <div class="popup">
+        <a href="#" class="close">X</a>
+        <div class="request-content"></div>
+      </div>
+    </div>
+    <style>
+      /* POPUP */
+
+      .popup-container {
+        position: fixed;
+        top: 0%;
+        left: 0%;
+        width: 100vw;
+        height: 100vh;
+        backdrop-filter: blur(10px); /* Standard syntax */
+        -webkit-backdrop-filter: blur(10px); /* Safari 9+ and iOS 9+ */
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s linear 0.3s, opacity 0.3s ease-in-out;
+      }
+
+      .popup-container:target {
+        visibility: visible;
+        opacity: 1;
+        transition: visibility 0s linear 0s, opacity 0.3s ease-in-out;
+      }
+
+      .popup {
+        text-align: center;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 1rem;
+        border-radius: 1rem;
+        box-shadow: 2px 2px 4px rgb(0 0 0 / 50%);
+        width: auto;
+        height: auto;
+      }
+
+      .close {
+        text-decoration: none;
+        color: rgb(255, 0, 0, 0.5);
+        width: min-content;
+        font-weight: bold;
+        background-color: transparent;
+        margin: auto;
+        display: block;
+        border: none;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+
+      .request-content {
+        width: auto;
+        height: auto;
+        box-sizing: border-box;
+        overflow: auto;
+      }
+
+      .request-content h4 {
+        margin-top: 2rem;
+      }
+
+      /* DETAILS */
+
+      .view-details {
+        width: 7rem;
+        margin: 20px auto;
+        color: blue;
+        cursor: pointer;
+        transition: height 0.5s ease;
+      }
+
+      .hide {
+        display: none;
+      }
+
+      .hide:checked + .details {
+        display: block;
+        height: 8rem;
+        padding: 0.8rem;
+      }
+
+      .details {
+        display: block;
+        margin-top: 20px;
+        background-color: rgb(220, 220, 220);
+        border-radius: 10px;
+        height: 0;
+        overflow: auto;
+        transition: all 0.5s ease;
+      }
+    </style>
+
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JQUERY -->
+    <script src="../../backend/scripts/code.jquery.com_jquery-3.6.0.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../../backend/scripts/script.js"></script>
+    <!-- Core theme JS-->
+    <script src="js/scripts.js"></script>
+
+    <script>
+      let products;
+
+      let categories;
+
+      window.onload = async function () {
+        await getProductos();
+        //await getcategorias();
+        const obtenerProduct = obtenerParam("id");
+        if (obtenerProduct) {
+          mainContent(obtenerProduct);
+        }
+        getCart();
+      };
+
+      function mainContent(obtenerProduct) {
+        const mainProduct = filtrarProducto(parseInt(obtenerProduct));
+
+        if (mainProduct) {
+          createProduct(mainProduct);
+          const filterByCategory = filtrarProductosByCategory(
+            mainProduct[0].categoria_id,
+            parseInt(obtenerProduct)
+          );
+          createProductsSameCategory(filterByCategory);
+        }
+      }
+
+      function filtrarProductosByCategory(idC, id) {
+        console.log(idC, id);
+
+        const productosFiltrados = products
+          .filter(
+            (producto) => producto.categoria_id === idC && producto.id !== id
+          )
+          .slice(0, 4);
+
+        console.log(productosFiltrados);
+        return productosFiltrados;
+      }
+
+      function filtrarProducto(id) {
+        console.log("ID", id);
+
+        const productoFiltrado = products.filter(
+          (producto) => producto.id === id
+        );
+
+        console.log(productoFiltrado);
+
+        return productoFiltrado;
+      }
+
+      async function getProductos() {
+        try {
+          // const productos = await APIrequest.bridgeToAjax('GET', 'productos', null, null, null, null, '../../backend/php/index.php?');
+          const productos = [
+            {
+              id: 1,
+              date: "2023-12-31",
+              timestamp: "2023-12-08 17:03:33",
+              categoria_id: 1,
+              nombre: "Camiseta Básica",
+              descripcion: "Camiseta de algodón, color blanco, talla M",
+              precio: "5000",
+              descuento: "0.25",
+              habilitado: 1,
+              sku: "SKU123",
+              image: "1.webp",
+            },
+            {
+              id: 2,
+              date: "2023-12-30",
+              timestamp: "2023-12-07 16:02:32",
+              categoria_id: 2,
+              nombre: "Pantalón Jeans",
+              descripcion: "Pantalón de mezclilla, color azul, talla 32",
+              precio: "6000",
+              descuento: "0.10",
+              habilitado: 1,
+              sku: "SKU124",
+              image: "2.webp",
+            },
+            {
+              id: 3,
+              date: "2023-12-29",
+              timestamp: "2023-12-06 15:01:31",
+              categoria_id: 3,
+              nombre: "Chaqueta Deportiva",
+              descripcion: "Chaqueta de poliéster, color negro, talla L",
+              precio: "7000",
+              descuento: "0.15",
+              habilitado: 1,
+              sku: "SKU125",
+              image: "3.webp",
+            },
+            {
+              id: 4,
+              date: "2023-12-28",
+              timestamp: "2023-12-05 14:00:30",
+              categoria_id: 4,
+              nombre: "Vestido Veraniego",
+              descripcion: "Vestido de algodón, color rojo, talla S",
+              precio: "8000",
+              descuento: "0.20",
+              habilitado: 1,
+              sku: "SKU126",
+              image: "4.webp",
+            },
+            {
+              id: 5,
+              date: "2023-12-27",
+              timestamp: "2023-12-04 13:59:29",
+              categoria_id: 5,
+              nombre: "Sudadera con Capucha",
+              descripcion: "Sudadera de algodón, color gris, talla XL",
+              precio: "9000",
+              descuento: "0.05",
+              habilitado: 1,
+              sku: "SKU127",
+              image: "5.webp",
+            },
+          ];
+          if (!productos.error) {
+            console.log(productos);
+            products = productos;
+          } else {
+            console.log(productos);
+          }
+        } catch (error) {
+          console.error("Error al obtener productos:", error);
+        }
+      }
+
+      async function getcategorias() {
+        try {
+          // const categorias = await APIrequest.bridgeToAjax('GET', 'categorias', null, null, null, null, '../../backend/php/index.php?');
+          const categorias = [
+            {
+              id: 1,
+              date: "2023-01-01",
+              timestamp: "2023-12-08 17:03:33",
+              nombre: "Camisetas",
+              descripcion: "Camisetas para Hombre y Mujer",
+            },
+            {
+              id: 2,
+              date: "2023-01-02",
+              timestamp: "2023-12-07 16:02:32",
+              nombre: "Pantalones",
+              descripcion: "Pantalones de diversas tallas y colores",
+            },
+            {
+              id: 3,
+              date: "2023-01-03",
+              timestamp: "2023-12-06 15:01:31",
+              nombre: "Chaquetas",
+              descripcion: "Chaquetas deportivas y casuales",
+            },
+            {
+              id: 4,
+              date: "2023-01-04",
+              timestamp: "2023-12-05 14:00:30",
+              nombre: "Vestidos",
+              descripcion: "Vestidos para toda ocasión",
+            },
+            {
+              id: 5,
+              date: "2023-01-05",
+              timestamp: "2023-12-04 13:59:29",
+              nombre: "Sudaderas",
+              descripcion: "Sudaderas cómodas y elegantes",
+            },
+          ];
+          if (!categorias.error) {
+            console.log(categorias);
+            categories = categorias;
+          } else {
+            console.log(categorias);
+          }
+        } catch (error) {
+          console.error("Error al obtener categorias:", error);
+        }
+      }
+
+      function obtenerParam(paramName, json = false) {
+        const url = window.location.href;
+        const cleanUrl = url.replace(/#$/, "");
+        const paramsString = cleanUrl.split("?")[1];
+
+        if (paramsString) {
+          try {
+            const decodedParams = decodeURIComponent(atob(paramsString));
+
+            if (!json) {
+              const paramsObject = new URLSearchParams(decodedParams);
+              const paramValue = paramsObject.get(paramName);
+              console.log(paramValue);
+              return paramValue;
+            } else {
+              const paramsObject = JSON.parse(decodedParams);
+              const paramValue = paramsObject[paramName];
+              console.log(paramValue);
+              return paramValue;
+            }
+          } catch (error) {
+            console.error("Error al decodificar los parámetros:", error);
+            return false;
+          }
+        } else {
+          console.log("No se encontraron parámetros en la URL.");
+          return false;
+        }
+      }
+
+      function createProduct(json) {
+        const productsContainer = document.getElementById("divProducts");
+        productsContainer.innerHTML = "";
+
+        if (json.length === 0) {
+          productsContainer.innerHTML =
+            '<h2 class="text-center my-5">No se encontraron Productos</h2>';
+          return;
+        }
+
+        json.forEach((product) => {
+          const tieneDescuento = parseFloat(product.descuento) > 0.0;
+
+          const precioConDescuento = tieneDescuento
+            ? (
+                parseFloat(product.precio) *
+                (1 - parseFloat(product.descuento))
+              ).toFixed(2)
+            : null;
+
+          const productHtml = `
+                        <div class="container px-4 px-lg-5 my-5" id="product-${
+                          product.id
+                        }">
+                            <div class="row gx-4 gx-lg-5 align-items-center">
+                                <div class="col-md-6"><img class="card-img-top mb-5 mb-md-0" src="../${
+                                  product.image
+                                }" alt="..." /></div>
+                                <div class="col-md-6">
+                                    <div class="small mb-1">SKU: ${
+                                      product.sku
+                                    }</div>
+                                    <h1 class="display-5 fw-bolder">${
+                                      product.nombre
+                                    }</h1>
+                                    <div class="fs-5 mb-5">
+                                        ${
+                                          tieneDescuento
+                                            ? `<span class="text-decoration-line-through">$${product.precio}</span> - <span>$${precioConDescuento}</span>`
+                                            : `$${product.precio}`
+                                        }
+                                    </div>
+                                    <p class="lead">${product.descripcion}</p>
+                                    <div class="container mt-5">
+                                        <div class="d-flex">
+                                        <button class="btn" type="button" onclick="decrementarCantidad()">
+                                            <i class="bi bi-dash"></i>
+                                        </button>
+                                        <input class="form-control text-center" id="inputQuantity" type="number" value="1" style="max-width: 3rem" />
+                                        <button class="btn" type="button" onclick="incrementarCantidad()">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                        <button class="btn btn-outline-dark mx-4 flex-shrink-0" type="button" onclick="addToCart(${
+                                          product.id
+                                        })">
+                                            <i class="bi-cart-fill me-1"></i>
+                                            Add to cart
+                                        </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+          productsContainer.innerHTML += productHtml;
+        });
+      }
+
+      function incrementarCantidad() {
+        var inputQuantity = document.getElementById("inputQuantity");
+        inputQuantity.value = parseInt(inputQuantity.value) + 1;
+      }
+
+      function decrementarCantidad() {
+        var inputQuantity = document.getElementById("inputQuantity");
+        if (parseInt(inputQuantity.value) > 1) {
+          inputQuantity.value = parseInt(inputQuantity.value) - 1;
+        }
+      }
+
+      function daysDifference(date1, date2) {
+        const oneDay = 24 * 60 * 60 * 1000;
+        const firstDate = new Date(date1);
+        const secondDate = new Date(date2);
+        const differenceInDays = Math.round(
+          Math.abs((firstDate - secondDate) / oneDay)
+        );
+        return differenceInDays;
+      }
+
+      function createProductsSameCategory(json) {
+        const productsContainer = document.getElementById(
+          "divProductsCategory"
+        );
+        productsContainer.innerHTML = "";
+
+        if (json.length === 0) {
+          productsContainer.innerHTML =
+            '<h2 class="text-center my-5">No se encontraron Productos</h2>';
+          return;
+        }
+
+        json.forEach((product) => {
+          const daysDiff = daysDifference(new Date(), product.date);
+
+          const esNuevo = daysDiff <= 7;
+
+          const tieneDescuento = parseFloat(product.descuento) > 0.0;
+
+          const precioConDescuento = tieneDescuento
+            ? (
+                parseFloat(product.precio) *
+                (1 - parseFloat(product.descuento))
+              ).toFixed(2)
+            : null;
+
+          const productHtml = `
+                        <div class="col mb-5" id="productCategory-${
+                          product.id
+                        }">
+                            <article class="card h-100">
+                                <!-- Sale badge-->
+                                ${
+                                  esNuevo
+                                    ? '<div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem" id="new_alert">NEW</div>'
+                                    : ""
+                                }
+                                <!-- Product image -->
+                                <figure>
+                                    <img class="card-img-top" src="${
+                                      product.image
+                                    }" alt="Product Image" />
+                                    <figcaption class="visually-hidden">Product Image Description</figcaption>
+                                </figure>
+                                
+                                <!-- Product details -->
+                                <div class="card-body p-4 text-center">
+                                    <h5 class="card-title fw-bolder">${
+                                      product.nombre
+                                    }</h5>
+                                    <!-- <p class="card-text">Brief description of the fancy product goes here.</p> -->
+                                    <!-- <p class="card-price">  <span class="text-muted text-decoration-line-through">$20.00</span> - <span>$80.00</span></p> -->
+                                </div>
+                        
+                                <!-- Product actions -->
+                                <div class="card-footer p-4 pt-0 border-top-0 bg-transparent text-center">
+                                    <div class="text-center"><a class="btn btn-outline-dark mt-auto" onclick="viewProduct(${
+                                      product.id
+                                    })">View Product</a></div>
+                                </div>
+                            </article>
+                        </div>   
+                    `;
+
+          productsContainer.innerHTML += productHtml;
+        });
+      }
+
+      function viewProduct(id) {
+        mainContent(id);
+      }
+
+      async function addToCart(id) {
+        const productoSelect = products.find((producto) => producto.id === id);
+
+        console.log(productoSelect);
+
+        const actualC = parseInt(
+          document.getElementById("inputQuantity").value
+        );
+
+        const productArray = {
+          id: productoSelect.id,
+          cantidad: actualC || 1,
+        };
+
+        console.log(productArray);
+
+        fetch("../../backend/php/cart.php?action=add", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(productArray),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (!data.error) {
+              console.log(data);
+              // Utils.popup('reply', `${data.success}`, 'Consulta Exitosa', 200);
+              Swal.fire(
+                `${data.success}`,
+                "Pulse el carrito para ver los productos",
+                "success"
+              );
+              getCart();
+            } else {
+              console.log(data);
+              // alert(`${data.error}`);
+              Swal.fire(`${data.error}`, "Conslte con soporte", "error");
+            }
+          })
+          .catch((error) => {
+            console.error("Error al comunicarse con el servidor:", error);
+            // alert('Error al agregar el producto al carrito.');
+            Swal.fire(
+              "Error al agregar el producto al carrito.",
+              "Consulte con soporte",
+              "error"
+            );
+          });
+      }
+
+      function getCart() {
+        fetch("../../backend/php/cart.php?action=get")
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+
+            const carrito = document.getElementById("cart");
+
+            const cantidad = data.length;
+
+            console.log(cantidad);
+
+            carrito.innerHTML = cantidad;
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      //deleteAll();
+
+      function deleteAll() {
+        fetch("../../backend/php/cart.php?action=deleteAll")
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            getCart();
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+    </script>
+  </body>
+</html>

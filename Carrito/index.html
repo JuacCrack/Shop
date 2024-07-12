@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>MarketPlace</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+    <!-- Bootstrap icons-->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap CSS-->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="css/styles.css" rel="stylesheet" />
+    <!-- Incluir SweetAlert2 CSS y JS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11.5.1/dist/sweetalert2.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.5.1/dist/sweetalert2.all.min.js"></script>
+  </head>
+
+  <body>
+    <header>
+      <!-- Navigation-->
+      <nav
+        class="navbar navbar-expand-lg navbar-light bg-light"
+        style="
+          top: 0;
+          height: 10vh !important;
+          position: fixed;
+          width: 100%;
+          z-index: 99999999;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+        "
+      >
+        <div class="container">
+          <a class="navbar-brand" href="../">MarketPlace</a>
+          <form class="d-flex">
+            <button
+              class="btn btn-outline-dark"
+              type="button"
+              onclick="window.location.href = '../'"
+            >
+              <i class="bi bi-house-door-fill"></i>
+            </button>
+          </form>
+        </div>
+      </nav>
+    </header>
+
+    <main
+      class="pb-5 overflow-auto"
+      style="height: 90vh !important; padding-top: 20vh"
+    >
+      <style>
+        img {
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: cover !important;
+        }
+
+        figure {
+          margin: 0 !important;
+        }
+
+        p {
+          margin: 0;
+        }
+      </style>
+
+      <!-- Section -->
+      <section class="container">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-6 h-100" style="margin-bottom: 10rem">
+              <h3 class="mb-5">Resumen de compra</h3>
+              <div class="container overflow-auto" id="resumeContent"></div>
+            </div>
+            <div
+              class="col-md-5 ms-auto h-100"
+              style="
+                border-left: 1px solid rgb(213 213 213);
+                border-right: 1px solid rgb(213 213 213);
+              "
+            >
+              <h3 class="mb-4 ps-3">Totales</h3>
+              <div class="container p-2">
+                <div class="row" id="invoiceContent"></div>
+
+                <div class="row mt-5 pb-5">
+                  <div class="col-12 mx-auto">
+                    <button class="btn w-100 btn-outline-dark" type="submit">
+                      RESERVAR
+                    </button>
+                    <div id="colocaraqui">
+                      <div id="wallet_container"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer-->
+    <footer class="py-5 bg-dark" style="height: 10vh !important">
+      <div class="container">
+        <p class="m-0 text-center text-white">
+          &copy; 2024 Designed and Developed by
+          <a href="https://juaccrack.github.io/DevFalls/">DevFalls</a>
+        </p>
+      </div>
+    </footer>
+
+    <div class="popup-container" id="popup">
+      <div class="popup">
+        <a href="#" class="close">X</a>
+        <div class="request-content"></div>
+      </div>
+    </div>
+    <style>
+      /* POPUP */
+
+      .popup-container {
+        position: fixed;
+        top: 0%;
+        left: 0%;
+        width: 100vw;
+        height: 100vh;
+        backdrop-filter: blur(10px);
+        /* Standard syntax */
+        -webkit-backdrop-filter: blur(10px);
+        /* Safari 9+ and iOS 9+ */
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s linear 0.3s, opacity 0.3s ease-in-out;
+      }
+
+      .popup-container:target {
+        visibility: visible;
+        opacity: 1;
+        transition: visibility 0s linear 0s, opacity 0.3s ease-in-out;
+      }
+
+      .popup {
+        text-align: center;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 1rem;
+        border-radius: 1rem;
+        box-shadow: 2px 2px 4px rgb(0 0 0 / 50%);
+        width: auto;
+        height: auto;
+      }
+
+      .close {
+        text-decoration: none;
+        color: rgb(255, 0, 0, 0.5);
+        width: min-content;
+        font-weight: bold;
+        background-color: transparent;
+        margin: auto;
+        display: block;
+        border: none;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+
+      .request-content {
+        width: auto;
+        height: auto;
+        box-sizing: border-box;
+        overflow: auto;
+      }
+
+      /* DETAILS */
+
+      .view-details {
+        width: 5rem;
+        margin: 20px auto;
+        color: blue;
+        cursor: pointer;
+        transition: height 0.5s ease;
+      }
+
+      .hide {
+        display: none;
+      }
+
+      .hide:checked + .details {
+        display: block;
+        height: 8rem;
+        padding: 0.8rem;
+      }
+
+      .details {
+        display: block;
+        margin-top: 20px;
+        background-color: rgb(220, 220, 220);
+        border-radius: 10px;
+        height: 0;
+        overflow: auto;
+        transition: all 0.5s ease;
+      }
+    </style>
+
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JQUERY -->
+    <script src="../../backend/scripts/code.jquery.com_jquery-3.6.0.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../../backend/scripts/script.js"></script>
+    <!-- Core theme JS-->
+    <script src="js/scripts.js"></script>
+
+    <script>
+      // const productos = await APIrequest.bridgeToAjax(method, table, id, action, image, addData);
+
+      let products;
+
+      let categories;
+
+      let finalJSON;
+
+      window.onload = async function () {
+        Swal.fire(
+          "Sección no disponible",
+          "En modo de Prueba esta sección no esta disponible",
+          "error"
+        );
+
+        // const cart = await getCart();
+        // if (cart.length !== 0) {
+        //   await mainDesign();
+        // } else {
+        //   // alert('CARRITO VACIO');
+        //   Swal.fire(
+        //     "El carrito esta vacio",
+        //     "En el menu principal puede ver los productos",
+        //     "error"
+        //   );
+        //   window.location.href = "../../";
+        //   return;
+        // }
+      };
+
+      async function getProductos() {
+        try {
+          // const productos = await APIrequest.bridgeToAjax('GET', 'productos', null, null, null, null, '../../backend/php/index.php?');
+          const productos = [
+            {
+              id: 1,
+              date: "2023-12-31",
+              timestamp: "2023-12-08 17:03:33",
+              categoria_id: 1,
+              nombre: "Camiseta Básica",
+              descripcion: "Camiseta de algodón, color blanco, talla M",
+              precio: "5000",
+              descuento: "0.25",
+              habilitado: 1,
+              sku: "SKU123",
+              image: "1.webp",
+            },
+            {
+              id: 2,
+              date: "2023-12-30",
+              timestamp: "2023-12-07 16:02:32",
+              categoria_id: 2,
+              nombre: "Pantalón Jeans",
+              descripcion: "Pantalón de mezclilla, color azul, talla 32",
+              precio: "6000",
+              descuento: "0.10",
+              habilitado: 1,
+              sku: "SKU124",
+              image: "2.webp",
+            },
+            {
+              id: 3,
+              date: "2023-12-29",
+              timestamp: "2023-12-06 15:01:31",
+              categoria_id: 3,
+              nombre: "Chaqueta Deportiva",
+              descripcion: "Chaqueta de poliéster, color negro, talla L",
+              precio: "7000",
+              descuento: "0.15",
+              habilitado: 1,
+              sku: "SKU125",
+              image: "3.webp",
+            },
+            {
+              id: 4,
+              date: "2023-12-28",
+              timestamp: "2023-12-05 14:00:30",
+              categoria_id: 4,
+              nombre: "Vestido Veraniego",
+              descripcion: "Vestido de algodón, color rojo, talla S",
+              precio: "8000",
+              descuento: "0.20",
+              habilitado: 1,
+              sku: "SKU126",
+              image: "4.webp",
+            },
+            {
+              id: 5,
+              date: "2023-12-27",
+              timestamp: "2023-12-04 13:59:29",
+              categoria_id: 5,
+              nombre: "Sudadera con Capucha",
+              descripcion: "Sudadera de algodón, color gris, talla XL",
+              precio: "9000",
+              descuento: "0.05",
+              habilitado: 1,
+              sku: "SKU127",
+              image: "5.webp",
+            },
+          ];
+          if (!productos.error) {
+            console.log(productos);
+            products = productos;
+            return productos;
+          } else {
+            console.log(productos);
+          }
+        } catch (error) {
+          console.error("Error al obtener productos:", error);
+        }
+      }
+
+      async function getcategorias() {
+        try {
+          // const categorias = await APIrequest.bridgeToAjax('GET', 'categorias', null, null, null, null, '../../backend/php/index.php?');
+          const categorias = [
+            {
+              id: 1,
+              date: "2023-01-01",
+              timestamp: "2023-12-08 17:03:33",
+              nombre: "Camisetas",
+              descripcion: "Camisetas para Hombre y Mujer",
+            },
+            {
+              id: 2,
+              date: "2023-01-02",
+              timestamp: "2023-12-07 16:02:32",
+              nombre: "Pantalones",
+              descripcion: "Pantalones de diversas tallas y colores",
+            },
+            {
+              id: 3,
+              date: "2023-01-03",
+              timestamp: "2023-12-06 15:01:31",
+              nombre: "Chaquetas",
+              descripcion: "Chaquetas deportivas y casuales",
+            },
+            {
+              id: 4,
+              date: "2023-01-04",
+              timestamp: "2023-12-05 14:00:30",
+              nombre: "Vestidos",
+              descripcion: "Vestidos para toda ocasión",
+            },
+            {
+              id: 5,
+              date: "2023-01-05",
+              timestamp: "2023-12-04 13:59:29",
+              nombre: "Sudaderas",
+              descripcion: "Sudaderas cómodas y elegantes",
+            },
+          ];
+          if (!categorias.error) {
+            console.log(categorias);
+            categories = categorias;
+          } else {
+            console.log(categorias);
+          }
+        } catch (error) {
+          console.error("Error al obtener categorias:", error);
+        }
+      }
+
+      async function getCart() {
+        try {
+          const response = await fetch("../../backend/php/cart.php?action=get");
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error("Error:", error);
+          return false;
+        }
+      }
+
+      async function obtenerCheckout() {
+        try {
+          const cart = await getCart();
+          if (cart.length === 0) {
+            // alert('NO HAY PRODUCTOS EN EL CARRITO');
+            Swal.fire(
+              "No hay productos en el carrito",
+              "En el menu principal puede ver los productos",
+              "error"
+            );
+          } else {
+            const response = await fetch("../../backend/php/mp.php");
+            const data = await response.json();
+            console.log(data);
+
+            if (!data.error) {
+              await mercadoPago(data.id);
+              return true;
+            } else {
+              // alert('ERRROR AL OBTENER MP')
+              Swal.fire(
+                "No se pudo obtener Mercado Pago",
+                "Consulte con soporte",
+                "error"
+              );
+            }
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          return false;
+        }
+      }
+
+      function getProductByIds(json) {
+        const matchingProducts = products.filter((product) => {
+          return json.some((item) => item.id === product.id);
+        });
+
+        matchingProducts.forEach((product) => {
+          const originalQuantity = json.find(
+            (item) => item.id === product.id
+          ).cantidad;
+          product.cantidad = originalQuantity;
+        });
+
+        finalJSON = matchingProducts;
+
+        return matchingProducts;
+      }
+
+      //deleteAll();
+
+      function deleteAll() {
+        fetch("../../backend/php/cart.php?action=deleteAll")
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            getCart();
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      function eliminarProducto(id) {
+        const url = `../../backend/php/cart.php?action=deleteById&id=${id}`;
+        console.log("URL:", url);
+
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            if (!data.error) {
+              console.log(data);
+              //mainDesign();
+              location.reload();
+            } else {
+              console.log(data);
+            }
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      async function mainDesign() {
+        Utils.mostrarPreloader(true);
+
+        const products = await getProductos();
+
+        if (products.length !== 0) {
+          const cart = await getCart();
+
+          if (cart.length !== 0) {
+            const checkout = await obtenerCheckout();
+
+            if (checkout) {
+              const result = await getProductByIds(cart);
+
+              if (result) {
+                console.log(result);
+                createResume(result);
+                createInvoice(result);
+
+                Utils.mostrarPreloader(false);
+              } else {
+                // alert('No se encontraron coincidencias');
+                Swal.fire(
+                  "No se encontraron coincidencias",
+                  "Los productos no coinciden con el carrito",
+                  "error"
+                );
+              }
+            } else {
+              // alert('No se pudo obtener el metodo de Pago')
+              Swal.fire(
+                "No se pudo obtener Mercado Pago",
+                "Consulte con soporte",
+                "error"
+              );
+            }
+          } else {
+            location.reload();
+          }
+        } else {
+          // alert('No se pudo obtener los productos');
+          Swal.fire(
+            "No se pudo obtener los productos",
+            "Consulte con soporte",
+            "error"
+          );
+        }
+      }
+
+      function createResume(json) {
+        const resumeContent = document.getElementById("resumeContent");
+
+        resumeContent.innerHTML = "";
+
+        json.forEach((item) => {
+          const row = document.createElement("div");
+          row.classList.add("row", "p-2");
+          row.style.borderBottom = "1px solid rgb(221, 221, 221)";
+
+          const quantityCol = createColumn(
+            "col-2 center",
+            `<h5>x${item.cantidad}</h5>`
+          );
+          const imageCol = createColumn(
+            "col-2 center",
+            `<figure class="w-100"><img src="${item.image}" alt=""></figure>`
+          );
+          const productCol = createColumn(
+            "col-4 center",
+            `<article><h6>${item.nombre}</h6></article>`
+          );
+          const priceCol = createColumn(
+            "col-2 center",
+            `<h5>$${calculateTotal(item)}</h5>`
+          );
+          const deleteCol = createColumn(
+            "col-2 center",
+            `<h5><i style="color: red;" class="bi bi-x-lg"></i></h5>`,
+            `eliminarProducto(${item.id})`
+          );
+
+          row.appendChild(quantityCol);
+          row.appendChild(imageCol);
+          row.appendChild(productCol);
+          row.appendChild(priceCol);
+          row.appendChild(deleteCol);
+
+          resumeContent.appendChild(row);
+        });
+      }
+
+      function createColumn(classes, content, onClick) {
+        const col = document.createElement("div");
+        const classList = classes.split(" ");
+        col.classList.add(...classList);
+        col.innerHTML = content;
+
+        if (onClick) {
+          col.setAttribute("onclick", onClick);
+        }
+
+        return col;
+      }
+
+      function calculateTotal(item, includeDiscount = false) {
+        const price = parseFloat(item.precio);
+        const quantity = parseInt(item.cantidad);
+
+        let totalWithoutDiscount = price * quantity;
+
+        if (includeDiscount) {
+          const discount = parseFloat(item.descuento);
+          const discountAmount = discount * totalWithoutDiscount;
+          totalWithoutDiscount -= discountAmount;
+        }
+
+        return totalWithoutDiscount.toFixed(2);
+      }
+
+      function calculateTotalDiscount(itemList) {
+        const totalDiscount = itemList.reduce((acc, item) => {
+          const price = parseFloat(item.precio);
+          const quantity = parseInt(item.cantidad);
+          const discount = parseFloat(item.descuento);
+
+          const totalWithoutDiscount = price * quantity;
+
+          const discountAmount = discount * totalWithoutDiscount;
+
+          return acc + discountAmount;
+        }, 0);
+
+        return totalDiscount.toFixed(2);
+      }
+      function createInvoice(json) {
+        const invoiceContent = document.getElementById("invoiceContent");
+        invoiceContent.innerHTML = "";
+        const invoiceContainer = document.createElement("div");
+        invoiceContainer.classList.add("col-12");
+
+        const headerRow = createHeaderRow();
+        invoiceContainer.appendChild(headerRow);
+
+        let totalAmount = 0;
+
+        json.forEach((item) => {
+          const productRow = createProductRow(item);
+          invoiceContainer.appendChild(productRow);
+
+          const totalForItem = calculateTotal(item, true);
+          totalAmount += parseFloat(totalForItem);
+        });
+
+        const discountRow = createDiscountRow(json);
+        invoiceContainer.appendChild(discountRow);
+
+        const totalRow = createTotalRow(totalAmount);
+        invoiceContainer.appendChild(totalRow);
+
+        invoiceContent.appendChild(invoiceContainer);
+      }
+
+      function createTotalRow(totalAmount) {
+        const totalRow = document.createElement("div");
+        totalRow.classList.add("row", "mt-4");
+
+        const quantityCol = createColumn("col-2 text-center", "<h6>Total</h6>");
+        const nameCol = createColumn("col-8", "<p></p>");
+        const amountCol = createColumn(
+          "col-2 text-center",
+          `<h6>${totalAmount.toFixed(2)}</h6>`
+        );
+
+        totalRow.appendChild(quantityCol);
+        totalRow.appendChild(nameCol);
+        totalRow.appendChild(amountCol);
+
+        return totalRow;
+      }
+
+      function createHeaderRow() {
+        const headerRow = document.createElement("div");
+        headerRow.classList.add("row", "my-3");
+
+        const quantityHeader = createColumn(
+          "col-2 text-center",
+          "<h6>Cant.</h6>"
+        );
+        const nameHeader = createColumn("col-8", "<h6>Nombre</h6>");
+        const amountHeader = createColumn(
+          "col-2 text-center",
+          "<h6>Importe</h6>"
+        );
+
+        headerRow.appendChild(quantityHeader);
+        headerRow.appendChild(nameHeader);
+        headerRow.appendChild(amountHeader);
+
+        return headerRow;
+      }
+
+      function createProductRow(item) {
+        const productRow = document.createElement("div");
+        productRow.classList.add("row", "my-3");
+
+        const quantityCol = createColumn(
+          "col-2 text-center",
+          `<h6>${item.cantidad > 0 ? "x" + item.cantidad : "-"}</h6>`
+        );
+        const nameCol = createColumn("col-8", `<p>${item.nombre}</p>`);
+        const amountCol = createColumn(
+          "col-2 text-center",
+          `<h6>${calculateTotal(item)}</h6>`
+        );
+
+        productRow.appendChild(quantityCol);
+        productRow.appendChild(nameCol);
+        productRow.appendChild(amountCol);
+
+        return productRow;
+      }
+
+      function createDiscountRow(json) {
+        const discountRow = document.createElement("div");
+        discountRow.classList.add("row", "my-3");
+
+        const quantityCol = createColumn(
+          "col-2 text-center",
+          '<h6 class="text-secondary">-</h6>'
+        );
+        const nameCol = createColumn(
+          "col-8",
+          '<p class="text-secondary">Descuento</p>'
+        );
+        const amountCol = createColumn(
+          "col-2 text-center",
+          `<h6 class="text-secondary">-${calculateTotalDiscount(json)}</h6>`
+        );
+
+        discountRow.appendChild(quantityCol);
+        discountRow.appendChild(nameCol);
+        discountRow.appendChild(amountCol);
+
+        return discountRow;
+      }
+    </script>
+
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+
+    <script>
+      async function mercadoPago(id) {
+        const mp = new MercadoPago(
+          "TEST-5a4a62b4-a9f5-4ebd-8f9c-09f0a3a4bb38",
+          {
+            locale: "es-AR",
+          }
+        );
+
+        mp.bricks().create("wallet", "wallet_container", {
+          initialization: {
+            preferenceId: id,
+          },
+        });
+      }
+    </script>
+  </body>
+</html>

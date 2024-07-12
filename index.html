@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Tienda</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!-- Bootstrap icons-->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="css/styles.css" rel="stylesheet" />
+    <!-- Incluir SweetAlert2 CSS y JS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11.5.1/dist/sweetalert2.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.5.1/dist/sweetalert2.all.min.js"></script>
+  </head>
+  <body>
+    <!-- Navigation-->
+    <nav
+      class="navbar navbar-expand-lg navbar-light bg-light"
+      style="
+        height: 10vh !important;
+        position: fixed;
+        width: 100%;
+        z-index: 99999999;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+      "
+    >
+      <div class="container">
+        <a class="navbar-brand" href="#!">Tienda</a>
+        <form class="d-flex">
+          <button
+            class="btn btn-outline-dark"
+            type="button"
+            onclick="window.location.href='Carrito/'"
+          >
+            <i class="bi-cart-fill me-1"></i>
+            Cart
+            <span class="badge bg-dark text-white ms-1 rounded-pill" id="cart"
+              >0</span
+            >
+          </button>
+        </form>
+      </div>
+    </nav>
+    <!-- Header-->
+    <header class="bg-dark" style="height: 70vh !important">
+      <div class="container w-100 h-100 center">
+        <div class="text-center text-white">
+          <h1 class="display-4 fw-bolder">Tienda</h1>
+          <p class="lead fw-normal text-white-50 mb-0">
+            Los mejores productos al mejor precio
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Section-->
+    <section class="my-5">
+      <div class="container">
+        <h2 class="mb-5">Productos</h2>
+
+        <div class="row">
+          <form action="#" class="form">
+            <div class="row">
+              <div class="col-md-6 col-lg-4">
+                <div class="input-group mb-3">
+                  <input
+                    type="text"
+                    id="searchByName"
+                    class="form-control"
+                    placeholder="Buscar..."
+                    aria-label="Buscar"
+                    aria-describedby="basic-addon2"
+                  />
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    id="buttonSearch"
+                  >
+                    Buscar
+                  </button>
+                </div>
+              </div>
+
+              <div class="col-md-6 col-lg-4">
+                <div class="input-group mb-3">
+                  <label class="input-group-text" for="ordenarPor"
+                    >Ordenar por:</label
+                  >
+                  <select class="form-select" id="ordenarPor">
+                    <option value="">Seleccione un Orden</option>
+                    <option value="0">Mostrar Todo</option>
+                    <option value="1">Más recientes</option>
+                    <option value="2">Más Antiguos</option>
+                    <option value="3">Mayor Precio</option>
+                    <option value="4">Menor Precio</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="col-md-6 col-lg-4">
+                <div class="input-group mb-3">
+                  <label class="input-group-text" for="ordenarPor"
+                    >Filtrar por:</label
+                  >
+                  <select class="form-select" id="filtrarPor"></select>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section-->
+    <section class="my-5">
+      <div
+        class="container mt-5"
+        style="max-height: 100vh !important; overflow: auto"
+      >
+        <div class="row" id="divProducts"></div>
+      </div>
+    </section>
+
+    <!-- Footer-->
+    <footer class="py-5 bg-dark">
+      <div class="container">
+        <p class="m-0 text-center text-white">
+          &copy; 2024 Designed and Developed by
+          <a href="https://juaccrack.github.io/DevFalls/">DevFalls</a>
+        </p>
+      </div>
+    </footer>
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JQUERY -->
+    <script src="../backend/scripts/code.jquery.com_jquery-3.6.0.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../backend/scripts/script.js"></script>
+    <!-- Core theme JS-->
+    <script src="js/scripts.js"></script>
+
+    <script>
+      // const productos = await APIrequest.bridgeToAjax(method, table, id, action, image, addData);
+
+      let products;
+
+      let categories;
+
+      window.onload = async function () {
+        getProductos();
+        getcategorias();
+        getCart();
+      };
+
+      const buttonSearch = document.getElementById("buttonSearch");
+
+      buttonSearch.onclick = function () {
+        searchByName();
+      };
+
+      const ordenarPor = document.getElementById("ordenarPor");
+
+      ordenarPor.onchange = function () {
+        ordenarPorFilter(parseInt(this.value));
+      };
+
+      const filtrarPor = document.getElementById("filtrarPor");
+
+      filtrarPor.onchange = function () {
+        filtrarPorCategorie(parseInt(this.value));
+      };
+
+      async function getProductos() {
+        try {
+          const productos = [
+            {
+              id: 1,
+              date: "2023-12-31",
+              timestamp: "2023-12-08 17:03:33",
+              categoria_id: 1,
+              nombre: "Camiseta Básica",
+              descripcion: "Camiseta de algodón, color blanco, talla M",
+              precio: "5000",
+              descuento: "0.25",
+              habilitado: 1,
+              sku: "SKU123",
+              image: "1.webp",
+            },
+            {
+              id: 2,
+              date: "2023-12-30",
+              timestamp: "2023-12-07 16:02:32",
+              categoria_id: 2,
+              nombre: "Pantalón Jeans",
+              descripcion: "Pantalón de mezclilla, color azul, talla 32",
+              precio: "6000",
+              descuento: "0.10",
+              habilitado: 1,
+              sku: "SKU124",
+              image: "2.webp",
+            },
+            {
+              id: 3,
+              date: "2023-12-29",
+              timestamp: "2023-12-06 15:01:31",
+              categoria_id: 3,
+              nombre: "Chaqueta Deportiva",
+              descripcion: "Chaqueta de poliéster, color negro, talla L",
+              precio: "7000",
+              descuento: "0.15",
+              habilitado: 1,
+              sku: "SKU125",
+              image: "3.webp",
+            },
+            {
+              id: 4,
+              date: "2023-12-28",
+              timestamp: "2023-12-05 14:00:30",
+              categoria_id: 4,
+              nombre: "Vestido Veraniego",
+              descripcion: "Vestido de algodón, color rojo, talla S",
+              precio: "8000",
+              descuento: "0.20",
+              habilitado: 1,
+              sku: "SKU126",
+              image: "4.webp",
+            },
+            {
+              id: 5,
+              date: "2023-12-27",
+              timestamp: "2023-12-04 13:59:29",
+              categoria_id: 5,
+              nombre: "Sudadera con Capucha",
+              descripcion: "Sudadera de algodón, color gris, talla XL",
+              precio: "9000",
+              descuento: "0.05",
+              habilitado: 1,
+              sku: "SKU127",
+              image: "5.webp",
+            },
+          ];
+          //   const productos = await APIrequest.bridgeToAjax(
+          //     "GET",
+          //     "productos",
+          //     null,
+          //     null,
+          //     null,
+          //     null,
+          //     "../backend/php/index.php?"
+          //   );
+          if (!productos.error) {
+            console.log(productos);
+            products = productos;
+            createProduct(productos);
+          } else {
+            console.log(productos);
+          }
+        } catch (error) {
+          console.error("Error al obtener productos:", error);
+        }
+      }
+
+      async function getcategorias() {
+        try {
+          const categorias = [
+            {
+              id: 1,
+              date: "2023-01-01",
+              timestamp: "2023-12-08 17:03:33",
+              nombre: "Camisetas",
+              descripcion: "Camisetas para Hombre y Mujer",
+            },
+            {
+              id: 2,
+              date: "2023-01-02",
+              timestamp: "2023-12-07 16:02:32",
+              nombre: "Pantalones",
+              descripcion: "Pantalones de diversas tallas y colores",
+            },
+            {
+              id: 3,
+              date: "2023-01-03",
+              timestamp: "2023-12-06 15:01:31",
+              nombre: "Chaquetas",
+              descripcion: "Chaquetas deportivas y casuales",
+            },
+            {
+              id: 4,
+              date: "2023-01-04",
+              timestamp: "2023-12-05 14:00:30",
+              nombre: "Vestidos",
+              descripcion: "Vestidos para toda ocasión",
+            },
+            {
+              id: 5,
+              date: "2023-01-05",
+              timestamp: "2023-12-04 13:59:29",
+              nombre: "Sudaderas",
+              descripcion: "Sudaderas cómodas y elegantes",
+            },
+          ];
+          //   const categorias = await APIrequest.bridgeToAjax(
+          //     "GET",
+          //     "categorias",
+          //     null,
+          //     null,
+          //     null,
+          //     null,
+          //     "../backend/php/index.php?"
+          //   );
+          if (!categorias.error) {
+            console.log(categorias);
+            categories = categorias;
+            generateOptions(categorias);
+          } else {
+            console.log(categorias);
+          }
+        } catch (error) {
+          console.error("Error al obtener categorias:", error);
+        }
+      }
+
+      function daysDifference(date1, date2) {
+        const oneDay = 24 * 60 * 60 * 1000;
+        const firstDate = new Date(date1);
+        const secondDate = new Date(date2);
+        const differenceInDays = Math.round(
+          Math.abs((firstDate - secondDate) / oneDay)
+        );
+        return differenceInDays;
+      }
+
+      function createProduct(json) {
+        const productsContainer = document.getElementById("divProducts");
+        productsContainer.innerHTML = "";
+
+        if (json.length === 0) {
+          productsContainer.innerHTML =
+            '<h2 class="text-center my-5">No se encontraron Productos</h2>';
+          return;
+        }
+
+        json.forEach((product) => {
+          const tieneDescuento = parseFloat(product.descuento) > 0.0;
+
+          const precioConDescuento = tieneDescuento
+            ? (
+                parseFloat(product.precio) *
+                (1 - parseFloat(product.descuento))
+              ).toFixed(2)
+            : null;
+
+          const daysDiff = daysDifference(new Date(), product.date);
+
+          const esNuevo = daysDiff <= 7;
+
+          const productHtml = `
+                            <div class="col-lg-4 col-md-4 col-sm-12 mb-5" id="product-${
+                              product.id
+                            }">
+                                <article class="card h-100">
+                                    <!-- Sale badge-->
+                                    ${
+                                      esNuevo
+                                        ? '<div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem" id="new_alert">NEW</div>'
+                                        : ""
+                                    }
+                                    <!-- Product image -->
+                                    <figure>.
+                                        <img class="card-img-top" src="${
+                                          product.image
+                                        }" alt="Product Image" />
+                                        <figcaption class="visually-hidden">${
+                                          product.descripcion
+                                        }</figcaption>
+                                    </figure>
+                                    <!-- Product details -->
+                                    <div class="card-body p-4 text-center">
+                                        <h5 class="card-title fw-bolder">${
+                                          product.nombre
+                                        }</h5>
+                                        <p class="card-text">${
+                                          product.descripcion
+                                        }</p>
+                                        <p class="card-price">
+                                            ${
+                                              tieneDescuento
+                                                ? `<span class="text-muted text-decoration-line-through" id="descuento">$${product.precio}</span> -`
+                                                : `<span class="text-muted text-decoration-line-through" id="descuento" style="display: none;">$</span>`
+                                            }
+                                            <span id="precio">$${
+                                              tieneDescuento
+                                                ? precioConDescuento
+                                                : product.precio
+                                            }</span>
+                                        </p>
+                                    </div>
+                                    <!-- Product actions -->
+                                    <div class="card-footer p-4 pt-0 border-top-0 bg-transparent text-center d-flex justify-content-center">
+                                        <!-- <div class="ms-2"><a class="btn btn-outline-dark mt-auto" onclick="addToCart(${
+                                          product.id
+                                        })">  <i class="bi-cart-fill me-1"></i> Add to cart</a></div> -->
+                                        <div class="ms-2"><a class="btn btn-outline-dark mt-auto" onclick="viewProduct(${
+                                          product.id
+                                        })">Ver Producto</a></div>
+                                    </div>
+                                </article>
+                            </div>
+                        `;
+
+          productsContainer.innerHTML += productHtml;
+        });
+      }
+
+      function viewProduct(id) {
+        const params = `id=${encodeURIComponent(id)}`;
+        const encodeParams = btoa(params);
+        if (encodeParams) {
+          window.location.href = `Producto/index.html?${encodeParams}`;
+        }
+      }
+
+      function searchByName() {
+        const searchByNameInput = document.getElementById("searchByName");
+        const value = searchByNameInput.value.toLowerCase();
+
+        const filteredProducts = products.filter((product) => {
+          const productName = product.nombre.toLowerCase();
+          return productName.includes(value);
+        });
+
+        console.log(filteredProducts);
+
+        createProduct(filteredProducts);
+      }
+
+      function ordenarPorFilter(value) {
+        console.log(value);
+
+        let currentDate = new Date().toISOString().split("T")[0];
+
+        productsJSON = products;
+
+        switch (value) {
+          case 0:
+            console.log(products);
+            createProduct(products);
+            break;
+
+          case 1:
+            const recentProductsJSON = productsJSON
+              .filter((product) => product.date <= currentDate)
+              .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            createProduct(recentProductsJSON);
+
+            console.log(recentProductsJSON);
+
+            break;
+
+          case 2:
+            const oldProductsJSON = productsJSON
+              .filter((product) => product.date <= currentDate)
+              .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            createProduct(oldProductsJSON);
+
+            console.log(oldProductsJSON);
+
+            break;
+
+          case 3:
+            const sortedByPriceDesc = productsJSON.sort(
+              (a, b) => parseFloat(b.precio) - parseFloat(a.precio)
+            );
+
+            createProduct(sortedByPriceDesc);
+
+            console.log(sortedByPriceDesc);
+
+            break;
+
+          case 4:
+            const sortedByPriceAsc = productsJSON.sort(
+              (a, b) => parseFloat(a.precio) - parseFloat(b.precio)
+            );
+
+            createProduct(sortedByPriceAsc);
+
+            console.log(sortedByPriceAsc);
+
+            break;
+
+          case "":
+            createProduct(products);
+            break;
+
+          default:
+            createProduct(products);
+            break;
+        }
+      }
+
+      function generateOptions(json) {
+        const filtrarPor = document.getElementById("filtrarPor");
+
+        filtrarPor.innerHTML = "";
+
+        if (!Array.isArray(json) || json.length === 0) {
+          const option = document.createElement("option");
+          option.text = "Sin Categorias";
+          filtrarPor.add(option);
+        } else {
+          const option = document.createElement("option");
+          option.text = "Seleccione una Categoria";
+          filtrarPor.add(option);
+
+          json.forEach((category) => {
+            const option = document.createElement("option");
+            option.value = category.id;
+            option.text = category.nombre;
+            filtrarPor.add(option);
+          });
+        }
+      }
+
+      function filtrarPorCategorie(value) {
+        const productosFiltrados = products.filter(
+          (producto) => producto.categoria_id === value
+        );
+
+        console.log(productosFiltrados);
+
+        createProduct(productosFiltrados);
+      }
+
+      let productsOnCart = [];
+
+      function addToCart(id) {
+        const productoSelect = products.find((producto) => producto.id === id);
+
+        console.log(productoSelect);
+
+        const productoEnCarrito = productsOnCart.find(
+          (producto) => producto.id === id
+        );
+
+        // productsOnCart.push(productoSelect);
+        // console.log('Producto agregado al carrito:', productoSelect);
+
+        if (!productoEnCarrito) {
+          productsOnCart.push(productoSelect);
+          // alert('Producto agregado al carrito');
+          Swal.fire(
+            "Producto agregado al carrito",
+            "Haga click en el carrito para ver los productos",
+            "success"
+          );
+        } else {
+          // alert('El producto ya está en el carrito.');
+          Swal.fire(
+            "El producto ya está en el carrito",
+            "Agregue otro tipo de producto",
+            "error"
+          );
+        }
+
+        const carrito = document.getElementById("cart");
+
+        const cantidad = productsOnCart.length;
+
+        carrito.innerHTML = cantidad;
+
+        console.log(productsOnCart);
+      }
+
+      function getCart() {
+        fetch("../backend/php/cart.php?action=get")
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+
+            const carrito = document.getElementById("cart");
+
+            const cantidad = data.length;
+
+            console.log(cantidad);
+
+            carrito.innerHTML = cantidad;
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+    </script>
+  </body>
+</html>
