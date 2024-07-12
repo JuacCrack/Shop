@@ -153,6 +153,123 @@
     <script src="js/scripts.js"></script>
 
     <script>
+      function mainCart(json, action, id) {
+        try {
+          switch (action) {
+            case "add":
+              const jsonData = JSON.parse(json);
+
+              if (!jsonData) {
+                console.log(JSON.stringify({ error: "Invalid JSON data" }));
+                return;
+              }
+
+              const result = addProduct(jsonData);
+
+              if (result.success) {
+                console.log(
+                  JSON.stringify({ success: "Producto agregado correctamente" })
+                );
+              } else {
+                console.log(JSON.stringify({ error: result.error }));
+              }
+              break;
+
+            case "get":
+              getCart();
+              break;
+
+            case "deleteAll":
+              deleteAll();
+              break;
+
+            case "deleteById":
+              deleteById(id);
+              break;
+
+            default:
+              console.log(JSON.stringify({ error: "Invalid action" }));
+              break;
+          }
+        } catch (e) {
+          console.log(JSON.stringify({ error: "Error interno del servidor" }));
+        }
+      }
+
+      function deleteAll() {
+        if (localStorage.getItem("cart")) {
+          localStorage.setItem("cart", JSON.stringify([]));
+          console.log(JSON.stringify({ success: true }));
+        } else {
+          console.log(JSON.stringify({ error: "El carrito ya está vacío" }));
+        }
+      }
+
+      function addProduct(jsonData) {
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+        if (!jsonData.hasOwnProperty("id")) {
+          return { success: false, error: "ID de producto no proporcionado" };
+        }
+
+        const productId = jsonData.id;
+
+        let productFound = false;
+        cart = cart.map((product) => {
+          if (product.id === productId) {
+            if (
+              jsonData.hasOwnProperty("cantidad") &&
+              typeof jsonData.cantidad === "number"
+            ) {
+              product.cantidad += jsonData.cantidad;
+              productFound = true;
+            } else {
+              return { success: false, error: "La cantidad no es válida" };
+            }
+          }
+          return product;
+        });
+
+        if (!productFound) {
+          cart.push(jsonData);
+        }
+
+        localStorage.setItem("cart", JSON.stringify(cart));
+
+        return { success: true };
+      }
+
+      function getCart() {
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        console.log(JSON.stringify(cart));
+        const carrito = document.getElementById("cart");
+
+        const cantidad = cart.length;
+
+        console.log(cantidad);
+
+        if (carrito) {
+          carrito.innerHTML = cantidad;
+        }
+        return cart;
+      }
+
+      function deleteById(productId) {
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+        const index = cart.findIndex((product) => product.id === productId);
+
+        if (index !== -1) {
+          cart.splice(index, 1);
+          localStorage.setItem("cart", JSON.stringify(cart));
+          console.log(JSON.stringify({ success: true }));
+        } else {
+          console.log(
+            JSON.stringify({ error: "Producto no encontrado en el carrito" })
+          );
+        }
+      }
+
       // const productos = await APIrequest.bridgeToAjax(method, table, id, action, image, addData);
 
       let products;
@@ -587,22 +704,22 @@
         console.log(productsOnCart);
       }
 
-      function getCart() {
-        fetch("../backend/php/cart.php?action=get")
-          .then((response) => response.json())
-          .then((data) => {
-            console.log(data);
+      // function getCart() {
+      //   fetch("../backend/php/cart.php?action=get")
+      //     .then((response) => response.json())
+      //     .then((data) => {
+      //       console.log(data);
 
-            const carrito = document.getElementById("cart");
+      //       const carrito = document.getElementById("cart");
 
-            const cantidad = data.length;
+      //       const cantidad = data.length;
 
-            console.log(cantidad);
+      //       console.log(cantidad);
 
-            carrito.innerHTML = cantidad;
-          })
-          .catch((error) => console.error("Error:", error));
-      }
+      //       carrito.innerHTML = cantidad;
+      //     })
+      //     .catch((error) => console.error("Error:", error));
+      // }
     </script>
   </body>
 </html>
