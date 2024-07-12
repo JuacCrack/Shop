@@ -224,9 +224,9 @@
     <!-- Bootstrap core JS-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- JQUERY -->
-    <script src="../../backend/scripts/code.jquery.com_jquery-3.6.0.min.js"></script>
+    <!-- <script src="../../backend/scripts/code.jquery.com_jquery-3.6.0.min.js"></script> -->
     <!-- Custom JS -->
-    <script src="../../backend/scripts/script.js"></script>
+    <!-- <script src="../../backend/scripts/script.js"></script> -->
     <!-- Core theme JS-->
     <script src="js/scripts.js"></script>
 
@@ -597,7 +597,7 @@
       }
 
       async function mainDesign() {
-        Utils.mostrarPreloader(true);
+        // Utils.mostrarPreloader(true);
 
         const products = await getProductos();
 
@@ -615,7 +615,7 @@
                 createResume(result);
                 createInvoice(result);
 
-                Utils.mostrarPreloader(false);
+                // Utils.mostrarPreloader(false);
               } else {
                 // alert('No se encontraron coincidencias');
                 Swal.fire(
